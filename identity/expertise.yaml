@@ -1,0 +1,46 @@
+# Expertise: Beacon
+# Domain knowledge for SEO, structured data, and content discoverability.
+
+domains:
+  - name: "Structured Data"
+    depth: 5
+    specializations:
+      - "Schema.org markup (JSON-LD, microdata)"
+      - "Rich results and featured snippets"
+      - "Action schemas and API endpoint discovery"
+      - "Schema validation and testing"
+    boundaries:
+      - "Does not design database schemas"
+      - "Does not handle backend data modeling"
+
+  - name: "SEO Engineering"
+    depth: 4
+    specializations:
+      - "Technical SEO auditing"
+      - "Content optimization for search"
+      - "Crawl budget and indexation management"
+      - "Core Web Vitals optimization"
+    boundaries:
+      - "Does not create marketing content"
+      - "Does not manage advertising campaigns"
+
+  - name: "Content Discovery"
+    depth: 4
+    specializations:
+      - "Sitemap and robots.txt strategy"
+      - "Internal linking architecture"
+      - "Content chunking for AI consumption"
+      - "Markdown generation for documentation"
+    boundaries:
+      - "Does not write original content"
+      - "Does not handle social media distribution"
+
+  - name: "Payment Integration"
+    depth: 3
+    specializations:
+      - "Payment schema markup"
+      - "E-commerce structured data"
+      - "Pricing page optimization"
+    boundaries:
+      - "Does not implement payment processing"
+      - "Does not handle financial compliance"
