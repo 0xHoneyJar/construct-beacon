@@ -1,6 +1,6 @@
 name: auditing-content
 slug: auditing-content
-version: 1.0.0
+version: 2.0.0
 description: Analyze pages for LLM trust signals and retrieval resilience. Scores pages across 5 trust layers to identify content that may be misrepresented by AI systems.
 
 # Trigger patterns - when this skill should activate
@@ -12,6 +12,7 @@ triggers:
   - "score this page for trust signals"
   - "find claims that AI might misrepresent"
   - "analyze for AI safety"
+  - "run a full site audit"
 
 # Natural language examples for intent matching
 examples:
@@ -21,9 +22,9 @@ examples:
   - context: "User reviewing marketing content"
     user_says: "Our pricing page has a lot of claims without dates. Will that be a problem for LLMs?"
     agent_action: "Launch auditing-content to audit pricing page for temporal markers and claim verifiability"
-  - context: "User preparing content for publication"
-    user_says: "Before we publish this docs page, can you check if it's AI-readable?"
-    agent_action: "Launch auditing-content to score documentation page across 5 trust layers"
+  - context: "User wants comprehensive site audit"
+    user_says: "Audit everything — all pages and API routes"
+    agent_action: "Launch auditing-content in full-site mode to scan all pages and API routes in parallel"
 
 # Domain hints for proactive suggestion
 domain_hints:
@@ -43,7 +44,7 @@ capabilities:
   danger_level: safe
   effort_hint: medium
   downgrade_allowed: true
-  execution_hint: sequential
+  execution_hint: parallel  # across pages, not across phases within a page
   requires:
     native_runtime: false
     tool_calling: true
@@ -55,3 +56,15 @@ allowed-tools:
   - Write
   - Glob
   - Grep
+
+outputs:
+  - name: audit-report
+    path: "grimoires/beacon/audits/{slug}-audit.md"
+    format: detailed
+  - name: full-audit-report
+    path: "grimoires/beacon/audits/{app}-full-audit.md"
+    format: detailed
+
+categories:
+  - content-quality
+  - trust-analysis

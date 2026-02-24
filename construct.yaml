@@ -1,7 +1,7 @@
 schema_version: 3
 name: Sigil of the Beacon
 slug: beacon
-version: 1.0.0
+version: 2.0.0
 description: Signal readiness to the agent network with AI-retrievable content, trust auditing, and x402 payment endpoints
 author: 0xHoneyJar
 license: MIT
@@ -23,6 +23,27 @@ repository:
   homepage: https://constructs.network/constructs/beacon
 events:
   emits:
+    - type: forge.beacon.audit_completed
+      description: Emitted when an LLM trust audit completes for a page or full site
+      data_schema:
+        page_slug: string
+        score: number
+        risk_level: string
+    - type: forge.beacon.chunks_optimized
+      description: Emitted when chunk optimization recommendations are generated
+      data_schema:
+        page_slug: string
+        findings_count: number
+    - type: forge.beacon.markdown_generated
+      description: Emitted when markdown export capability is added to a page
+      data_schema:
+        page_path: string
+        mode: string
+    - type: forge.beacon.actions_defined
+      description: Emitted when JSON Schema and OpenAPI specs are generated for endpoints
+      data_schema:
+        endpoints_count: number
+        openapi_path: string
     - type: forge.beacon.discovery_generated
       description: Emitted when a /.well-known/x402 discovery endpoint is generated
       data_schema:
@@ -40,5 +61,5 @@ identity:
 hooks:
   post_install: scripts/install.sh
 quick_start:
-  command: /audit-content
+  command: /audit-llm
   description: check your site's LLM readiness

@@ -1,6 +1,6 @@
 name: generating-markdown
 slug: generating-markdown
-version: 1.0.0
+version: 2.0.0
 description: Add markdown export capability to Next.js pages via content negotiation and/or copy button. Detects codebase patterns to generate tailored code.
 
 # Trigger patterns - when this skill should activate
@@ -12,6 +12,7 @@ triggers:
   - "add copy button for markdown"
   - "enable content negotiation"
   - "serve this as markdown"
+  - "generate llms.txt"
 
 # Natural language examples for intent matching
 examples:
@@ -21,9 +22,9 @@ examples:
   - context: "User building AI-first API"
     user_says: "Add markdown export to all my documentation pages"
     agent_action: "Launch generating-markdown to generate route handlers with Accept: text/markdown support"
-  - context: "User improving discoverability"
-    user_says: "I need a copy button so users can share this page in markdown format"
-    agent_action: "Launch generating-markdown in component-only mode to add copy markdown button"
+  - context: "User wants machine-readable site description"
+    user_says: "Create an llms.txt file so AI agents can discover our site"
+    agent_action: "Launch generating-markdown in llms.txt mode to generate Vercel-pattern site description"
 
 # Domain hints for proactive suggestion
 domain_hints:
@@ -35,6 +36,7 @@ domain_hints:
   - api-routes
   - text-format
   - discoverability
+  - llms-txt
 
 entry: SKILL.md
 
@@ -56,3 +58,18 @@ allowed-tools:
   - Glob
   - Grep
   - Edit
+
+outputs:
+  - name: route-handler
+    path: "app/{path}/route.ts"
+    format: detailed
+  - name: llms-txt
+    path: "app/llms.txt/route.ts"
+    format: detailed
+  - name: manifest
+    path: "grimoires/beacon/exports/{slug}-manifest.md"
+    format: summary
+
+categories:
+  - content-export
+  - agent-readability

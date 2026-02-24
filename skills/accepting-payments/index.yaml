@@ -1,6 +1,6 @@
 name: accepting-payments
 slug: accepting-payments
-version: 1.0.0
+version: 2.0.0
 description: Generate x402 v2 payment middleware and route handlers for agent commerce
 
 # Trigger patterns - when this skill should activate

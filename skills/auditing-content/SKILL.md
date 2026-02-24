@@ -36,6 +36,35 @@ This skill audits pages against a 5-layer trust model based on how LLMs evaluate
    - Identify all text content, headings, claims, numbers, links
    - Note line numbers for each finding
 
+### Phase 1.5: Code Pattern Scanning
+
+Before analyzing content semantics, scan for code-level fabrication and dead code patterns. These are the highest-value findings from real deployments.
+
+#### Fabrication Patterns
+
+Scan all TSX/TS files in the target scope for these patterns. **Context qualifiers**: matches MUST be within rendering/display context (within 15 lines of `return`, JSX tags like `<div>`, `<span>`, `<p>`, or template literals used in UI). **Exclusions**: skip test files (`*.test.*`, `*.spec.*`, `__tests__/`), seed scripts (`seed.*`, `mock.*`), and configuration files (`*.config.*`).
+
+| Pattern | Regex | Severity | Example |
+|---------|-------|----------|---------|
+| Random data generators | `Math\.random\(\)` in data-display context | CRITICAL | Price charts using `Math.random()` for historical data |
+| Hardcoded financial values | `(?:apr\|apy\|rate)\s*[=:]\s*['"]?\d+\.?\d*['"]?` (case-insensitive) | CRITICAL | `currentAPR="67.50"` disconnected from live data |
+| Fabricated formulas | `\d{3,}\s*\/\s*\(\s*\w+\s*\+\s*\d+\s*\)` | CRITICAL | `apy={7000/(index+1)}` producing fake yield rates |
+| Hardcoded token amounts | `\b\d{4,}\b` in financial display context (exclude CSS z-index, port numbers, pixel dimensions, timestamps) | HIGH | Random raffle numbers displayed as real entry IDs |
+
+#### Dead Code Patterns
+
+| Pattern | Regex | Severity |
+|---------|-------|----------|
+| Props accepted but never used | Component accepts `data`/`value` prop but renders hardcoded values | HIGH |
+| Commented-out data sources | `//.*fetch\|//.*api\|//.*query` near active display code | MEDIUM |
+| TODO placeholders | `TODO.*data\|FIXME.*source\|HACK.*hardcod` | MEDIUM |
+
+For each detection, record:
+- File path and line number(s)
+- Exact code snippet
+- Why it's problematic for AI agents
+- Severity classification
+
 ### Phase 2: Trust Layer Analysis
 
 Score each layer on a 0-10 scale based on the checklist items found.
@@ -99,6 +128,8 @@ Score each layer on a 0-10 scale based on the checklist items found.
 
 **Note**: This layer may require checking other pages. If unable to verify, score conservatively and note "Unable to verify cross-source consistency."
 
+- [ ] **Contradiction cluster detection** - Multiple pages simultaneously asserting and denying the same feature state (e.g., "Feature X DISCONTINUED" banner + "Earning Feature X" label on the same or adjacent pages)
+
 ---
 
 #### Layer 4: Contextual Integrity (25% weight)
@@ -129,6 +160,7 @@ Score each layer on a 0-10 scale based on the checklist items found.
 - [ ] **Structured data** - Lists/tables for comparable information
 - [ ] **Code blocks** - Technical content in proper formatting
 - [ ] **Low marketing ratio** - Superlatives < 10% of copy
+- [ ] **Code-level structural cues** - No random number generators in data display paths, no hardcoded financial values disconnected from data sources
 
 **Scoring:**
 - 4/4 items = 10 points
@@ -170,11 +202,55 @@ For each high-risk claim, record:
 - Issue type
 - Specific recommendation
 
+### Phase 4.5: Severity Classification
+
+Classify all findings using this criteria:
+
+| Severity | Criteria | Action |
+|----------|----------|--------|
+| **CRITICAL** | Fabricated data presented as real (Math.random, hardcoded financials). Active contradiction clusters. Raw transaction calldata exposed without auth. | Must fix before AI readiness claim. Block deployment if possible. |
+| **HIGH** | Missing rate limiting on sensitive endpoints. Brand inconsistencies. Props rendering stale/disconnected data. | Fix in current sprint. |
+| **MEDIUM** | Missing temporal markers. Vague superlatives. Orphan facts without links. | Fix in next sprint. |
+| **LOW** | Structural improvements. Missing canonical signals. Marketing language in technical pages. | Backlog. |
+
+Count findings per severity for the executive summary.
+
 ### Phase 5: Generate Output
 
 Write the audit report to: `grimoires/beacon/audits/{page-slug}-audit.md`
 
 Use the template from `resources/templates/audit-report.md`.
+
+### Phase 5.5: Full-Site Audit Mode
+
+When invoked as `/audit-llm --all`:
+
+1. **Discover all pages** — Glob `app/**/page.tsx`, `app/**/page.mdx`
+2. **Discover all API routes** — Glob `app/api/**/route.ts`
+3. **Run per-page audits in parallel** — Each page gets a trust layer analysis
+4. **Run API route assessment** — For each route, evaluate:
+
+| Check | Method | Scoring |
+|-------|--------|---------|
+| Authentication | Grep for auth middleware, header checks | None=0, Basic=5, Full=10 |
+| Rate limiting | Grep for Upstash, rate-limit imports | None=0, Present=10 |
+| Cache policy | Check for `revalidate`, `cache` exports | None=0, Configured=10 |
+| Agent utility | Manual assessment of endpoint purpose | Low/Medium/High |
+| Security exposure | Check for raw calldata, private keys, admin ops | Critical/Safe |
+
+5. **Synthesize** — Aggregate per-page scores into single full-site report
+6. **Score progression table** — Include in output:
+
+| State | Score | Description |
+|-------|-------|-------------|
+| Current | {score}/10 | As-is assessment |
+| Post-P0 | {estimate}/10 | After fixing CRITICAL findings |
+| Post-P1 | {estimate}/10 | After fixing HIGH findings |
+| AI-Ready | 7.0+/10 | Threshold for agent consumption |
+
+Write full-site report to: `grimoires/beacon/audits/{app}-full-audit.md`
+
+Use the template from `resources/templates/full-audit-report.md`.
 
 ### Phase 6: Update State
 
@@ -246,3 +322,18 @@ If the page is primarily images/video:
 If content is fetched client-side:
 1. Note "Dynamic content detected - audit may be incomplete"
 2. Recommend providing static content or API response samples
+
+## Dual-Nature Contract
+
+### As an agent executing this skill:
+- **Input**: Page path or `--all` flag
+- **Phases**: 1 → 1.5 → 2 → 3 → 4 → 4.5 → 5 → 5.5 (if --all) → 6
+- **Decisions**: If `--all`, run pages in parallel. If single page, run sequentially.
+- **Escalation**: If score < 4.0, recommend immediate `/optimize-chunks` follow-up.
+- **Output**: Audit report in `grimoires/beacon/audits/`
+
+### As output consumed by other agents:
+- **Format**: Markdown with structured tables and severity tags
+- **Machine-readable fields**: Overall score, per-layer scores, severity counts, file:line references
+- **Cross-references**: Each finding links to file path and line number for automated fixing
+- **Temporal markers**: Audit timestamp, "as of" dates on all time-sensitive findings
