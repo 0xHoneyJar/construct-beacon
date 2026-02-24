@@ -36,7 +36,8 @@ if [ ! -f "$STATE_FILE" ]; then
 # Beacon State
 # Tracks audits, exports, and optimizations
 
-version: "1.0.0"
+schema_version: 2
+construct_version: "2.0.0"
 initialized: "$TIMESTAMP"
 last_activity: null
 

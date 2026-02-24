@@ -44,7 +44,7 @@ capabilities:
   danger_level: safe
   effort_hint: medium
   downgrade_allowed: true
-  execution_hint: parallel
+  execution_hint: parallel  # across pages, not across phases within a page
   requires:
     native_runtime: false
     tool_calling: true

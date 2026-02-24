@@ -28,7 +28,12 @@ These specifications enable agents to:
 
 ### Phase 1: Discover Endpoints
 
-1. **Read discovery endpoint** if it exists
+1. **Check prerequisites**
+   - Read `grimoires/beacon/state.yaml`
+   - If `discovery.last_generation` is non-null, prefer reading the existing discovery endpoint
+   - If no discovery endpoint exists and no API routes found, suggest: "Run `/beacon-discover` first to generate the x402 discovery endpoint."
+
+2. **Read discovery endpoint** if it exists
    - Parse `app/.well-known/x402/route.ts`
    - Extract endpoint list from discovery response
 

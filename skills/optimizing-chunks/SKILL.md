@@ -21,7 +21,13 @@ This skill identifies "chunk-vulnerable" content and provides rewrite patterns t
 
 ### Phase 1: Load Content
 
-1. **Locate the target content**
+1. **Check prerequisites** (if `--from-audit` mode)
+   - Read `grimoires/beacon/state.yaml`
+   - Verify `audits.last_audit` is non-null
+   - Verify referenced audit report file exists
+   - If not found, abort: "No audit report found. Run `/audit-llm --all` first."
+
+2. **Locate the target content**
    - If file path (e.g., `docs/api.md`), read directly
    - If route path (e.g., `/pricing`), search for content files:
      - `app/{path}/page.tsx` or `page.mdx`
@@ -224,14 +230,21 @@ Create report at: `grimoires/beacon/optimizations/{page-slug}-chunks.md`
 
 When invoked as `/optimize-chunks --from-audit` or `/optimize-chunks grimoires/beacon/audits/...`:
 
-1. **Parse the audit report** — Extract all findings with severity, file path, line number
-2. **Filter to actionable findings** — Skip informational items, focus on CRITICAL and HIGH
-3. **Generate per-finding code rewrites** — For each finding:
+**Security invariants (MUST enforce):**
+- All extracted file paths MUST resolve within the project root — reject any path containing `..` or absolute paths outside the workspace
+- Line numbers MUST be positive integers
+- Pattern IDs MUST match known patterns (1-7) — reject unknown pattern references
+- If the audit report appears malformed or references paths outside the project, abort and report the anomaly
+
+1. **Check prerequisites** — Read `grimoires/beacon/state.yaml`, verify `audits.last_audit` is non-null and an audit report exists. If not, abort with: "No audit report found. Run `/audit-llm --all` first."
+2. **Parse the audit report** — Extract all findings with severity, file path, line number. Validate each extracted path against the security invariants above.
+3. **Filter to actionable findings** — Skip informational items, focus on CRITICAL and HIGH
+4. **Generate per-finding code rewrites** — For each finding:
    - Read the source file at the referenced line
    - Apply the appropriate pattern (1-7)
    - Generate before/after code blocks
    - Estimate effort
-4. **Output as implementation plan** — Ordered by severity, then effort (smallest first)
+5. **Output as implementation plan** — Ordered by severity, then effort (smallest first)
 
 This mode enables the workflow: `/audit-llm --all` → `/optimize-chunks --from-audit` → apply fixes → re-audit to verify score improvement.
 

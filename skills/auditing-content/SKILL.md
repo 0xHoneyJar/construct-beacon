@@ -42,14 +42,14 @@ Before analyzing content semantics, scan for code-level fabrication and dead cod
 
 #### Fabrication Patterns
 
-Scan all TSX/TS files in the target scope for these patterns:
+Scan all TSX/TS files in the target scope for these patterns. **Context qualifiers**: matches MUST be within rendering/display context (within 15 lines of `return`, JSX tags like `<div>`, `<span>`, `<p>`, or template literals used in UI). **Exclusions**: skip test files (`*.test.*`, `*.spec.*`, `__tests__/`), seed scripts (`seed.*`, `mock.*`), and configuration files (`*.config.*`).
 
 | Pattern | Regex | Severity | Example |
 |---------|-------|----------|---------|
 | Random data generators | `Math\.random\(\)` in data-display context | CRITICAL | Price charts using `Math.random()` for historical data |
 | Hardcoded financial values | `(?:apr\|apy\|rate)\s*[=:]\s*['"]?\d+\.?\d*['"]?` (case-insensitive) | CRITICAL | `currentAPR="67.50"` disconnected from live data |
 | Fabricated formulas | `\d{3,}\s*\/\s*\(\s*\w+\s*\+\s*\d+\s*\)` | CRITICAL | `apy={7000/(index+1)}` producing fake yield rates |
-| Hardcoded token amounts | `\b\d{4,}\b` in financial display context | HIGH | Random raffle numbers displayed as real entry IDs |
+| Hardcoded token amounts | `\b\d{4,}\b` in financial display context (exclude CSS z-index, port numbers, pixel dimensions, timestamps) | HIGH | Random raffle numbers displayed as real entry IDs |
 
 #### Dead Code Patterns
 
