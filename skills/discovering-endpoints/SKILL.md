@@ -15,6 +15,8 @@ AI agents need to discover what services a business offers and how to pay for th
 
 The generated endpoint follows the x402 v2 protocol specification.
 
+> **Required context**: This skill requires a `chain-config` overlay. See `contexts/overlays/chain-config.json.example`.
+
 ## Trigger
 
 ```
@@ -105,6 +107,28 @@ Include:
 - Endpoints registered
 - Pricing summary
 - Test command
+
+### Phase 5.5: API Inventory Generation
+
+Generate a structured inventory of all API routes for cross-skill consumption:
+
+1. **Scan all API routes** — Glob `app/api/**/route.ts`
+2. **For each route, extract:**
+   - HTTP method(s) (GET, POST, etc.)
+   - Authentication method (header check, middleware, none)
+   - Rate limiting (Upstash, custom, none)
+   - Cache policy (revalidate, force-dynamic, none)
+   - Data sources (external APIs, databases, on-chain)
+   - Description from comments or function name
+
+3. **Classify agent utility:**
+   - **Tier 1**: Direct agent value (data retrieval, generation, actions)
+   - **Tier 2**: Supporting infrastructure (auth, analytics, profiles)
+   - **Tier 3**: Internal/admin only
+
+4. **Write inventory** to `grimoires/beacon/discovery/api-inventory.md`
+
+This inventory is consumed by `defining-actions` for OpenAPI generation and by `accepting-payments` for monetization candidates.
 
 ### Phase 6: Update State
 
@@ -201,3 +225,18 @@ If no `app/` directory:
 |------|-------------|
 | `app/.well-known/x402/route.ts` | Discovery endpoint |
 | `grimoires/beacon/discovery/service-manifest.md` | Generation manifest |
+
+## Dual-Nature Contract
+
+### As an agent executing this skill:
+- **Input**: Optional service name, chain config context overlay
+- **Phases**: 1 → 2 → 3 → 4 → 5 → 5.5 → 6
+- **Decisions**: If reality files exist, auto-detect. If not, prompt user. Generate API inventory alongside discovery endpoint.
+- **Escalation**: If no API routes found, ask user to specify endpoints manually.
+- **Output**: Discovery endpoint + API inventory + manifest in `grimoires/beacon/discovery/`
+
+### As output consumed by other agents:
+- **Format**: TypeScript route handler + structured markdown inventory
+- **Machine-readable fields**: Endpoint paths, methods, pricing, auth status, rate limit status
+- **Cross-references**: API inventory consumed by `defining-actions` and `accepting-payments`
+- **Temporal markers**: Generation timestamp, discovery endpoint version

@@ -1,6 +1,6 @@
 name: defining-actions
 slug: defining-actions
-version: 1.0.0
+version: 2.0.0
 description: Generate JSON Schema and OpenAPI specs for x402 endpoints
 
 # Trigger patterns - when this skill should activate

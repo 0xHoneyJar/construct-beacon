@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Audit Configuration",
+  "description": "Project-specific audit configuration for the auditing-content skill.",
+  "type": "object",
+  "properties": {
+    "known_data_sources": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Known legitimate data source APIs (e.g., Dune Analytics, CoinGecko)"
+    },
+    "deprecated_features": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "feature": { "type": "string" },
+          "deprecated_date": { "type": "string", "format": "date" },
+          "replacement": { "type": "string" }
+        }
+      },
+      "description": "Features known to be deprecated — used for contradiction detection"
+    },
+    "brand_terms": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Canonical brand terms to check for consistency"
+    },
+    "financial_data_patterns": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "pattern": { "type": "string", "description": "Regex to detect financial data" },
+          "expected_source": { "type": "string", "description": "Expected data source for this pattern" }
+        }
+      },
+      "description": "Patterns that indicate financial data which should come from verified sources"
+    }
+  }
+}

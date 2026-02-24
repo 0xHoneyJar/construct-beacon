@@ -109,6 +109,66 @@ Beacon refuses work outside its signal domain. These are not limitations — the
 
 ---
 
+## Dual-Nature Design
+
+Beacon skills serve two roles simultaneously:
+
+### As instructions for an executing agent
+Each skill provides clear phases, decision points, escalation rules, and structured outputs. An agent running `/audit-llm` follows a deterministic workflow with well-defined inputs and outputs.
+
+### As structured output consumed by other agents
+Each skill's output is machine-readable. An agent that has never seen the codebase can parse an audit report, extract findings by severity, and generate code fixes — because the output format is specified in the skill contract.
+
+This dual nature means Beacon is both the **toolbox** and the **communication protocol** for the agent network.
+
+---
+
+## Execution Dependency Graph
+
+Skills can be run independently, but this order maximizes value:
+
+```
+/audit-llm --all
+    |
+    |---> /optimize-chunks --from-audit
+    |         |
+    |         '---> [Apply P0 fixes]
+    |
+    |---> /add-markdown llms.txt
+    |
+    '---> /beacon-discover
+              |
+              |---> /beacon-actions
+              |
+              '---> /beacon-pay
+```
+
+The audit should run first — it identifies the issues that other skills fix.
+
+---
+
+## Context Overlays
+
+Beacon uses context overlays to avoid hardcoded chain/project values. Overlays live in `contexts/overlays/` and are referenced in skills via `{context:chain_config.field_name}`.
+
+### Setup
+
+1. Copy the example overlay:
+   ```bash
+   cp contexts/overlays/chain-config.json.example contexts/overlays/chain-config.json
+   ```
+2. Edit with your project values.
+3. (Optional) Create audit-config overlay for project-specific patterns:
+   ```bash
+   cp contexts/overlays/audit-config.json.example contexts/overlays/audit-config.json
+   ```
+
+### Schema Validation
+
+Schemas in `contexts/schemas/` define the required and optional fields for each overlay. See `chain-config.schema.json` and `audit-config.schema.json`.
+
+---
+
 ## Two Audiences, One Signal
 
 Beacon serves two discovery paradigms simultaneously.

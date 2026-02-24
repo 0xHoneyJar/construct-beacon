@@ -1,6 +1,6 @@
 # Skill: accepting-payments
 
-> Generate x402 v2 payment middleware and route handlers for agent commerce.
+> Generate x402 v2 payment middleware and route handlers for {context:chain_config.chain_name} agent commerce.
 >
 > **Required context:** `chain_config` — see `contexts/overlays/chain-config.json.example`
 
@@ -11,6 +11,8 @@ Turn any Next.js API route into a paid endpoint using the x402 protocol. This sk
 1. **Payment Middleware** - Verify X-Payment headers, generate 402 responses
 2. **Rate Limiter** - Per-agent, per-IP, and subsidy budget enforcement
 3. **Lifecycle Hooks** - Payment flow event handlers
+
+> **Required context**: This skill requires a `chain-config` overlay. See `contexts/overlays/chain-config.json.example`.
 
 ## Trigger
 
@@ -39,6 +41,32 @@ Turn any Next.js API route into a paid endpoint using the x402 protocol. This sk
 2. **If no discovery endpoint exists**
    - Recommend running `/beacon-discover` first
    - Ask user if they want to continue anyway
+
+### Phase 1.5: Rate Limiting Audit
+
+Before generating payment middleware, audit existing rate limiting:
+
+1. **Scan for existing rate limiting:**
+   ```
+   Grep for: upstash, ratelimit, rate-limit, throttle
+   Check: middleware.ts, lib/**, app/api/**/route.ts
+   ```
+
+2. **Assess current state:**
+   | Finding | Impact |
+   |---------|--------|
+   | No rate limiting found | HIGH — Payment endpoints need protection |
+   | Partial coverage | MEDIUM — Ensure payment routes are covered |
+   | Full coverage | LOW — Integrate with existing system |
+
+3. **If no rate limiting exists:**
+   - Warn user: "No existing rate limiting detected. Payment middleware will include its own rate limiter, but consider adding global rate limiting."
+   - Include rate limiter generation in Phase 4 (mandatory, not optional)
+
+4. **If rate limiting exists:**
+   - Detect the library (Upstash, custom, etc.)
+   - Generate middleware that integrates with existing rate limiter
+   - Skip standalone rate limiter generation
 
 ### Phase 2: Collect Configuration
 
@@ -195,7 +223,7 @@ X-Payment: base64({
 
 ### Facilitator Integration
 
-Default facilitator URL from context:
+Default facilitator for {context:chain_config.chain_name} (configurable via `{context:chain_config.payment_facilitator_url}`):
 ```
 {context:chain_config.payment_facilitator_url}
 ```
@@ -229,10 +257,10 @@ If middleware already exists:
 2. Ask user to confirm overwrite
 3. Backup existing files to `.backup/`
 
-### Non-Default Token
+### Non-{context:chain_config.default_token} Token
 
 If user specifies a token different from `{context:chain_config.default_token}`:
-1. Warn that the configured default token is recommended for the target chain
+1. Warn that {context:chain_config.default_token} is recommended for {context:chain_config.chain_name}
 2. Allow configuration but note in comments
 3. Update discovery endpoint if it exists
 
@@ -299,3 +327,18 @@ Next steps:
 4. **Audit trail**
    - Log all payment events
    - Include agent addresses in logs
+
+## Dual-Nature Contract
+
+### As an agent executing this skill:
+- **Input**: Endpoint paths, pricing, subsidy config, chain config context overlay
+- **Phases**: 1 → 1.5 → 2 → 3 → 4 → 5 → 6 → 7
+- **Decisions**: Check rate limiting before generating middleware. Integrate with existing systems when possible.
+- **Escalation**: If no discovery endpoint exists, recommend `/beacon-discover` first. If no rate limiting exists, warn and include mandatory rate limiter.
+- **Output**: Middleware + rate limiter + hooks in `lib/x402/`
+
+### As output consumed by other agents:
+- **Format**: TypeScript middleware, rate limiter, and hooks matching codebase conventions
+- **Machine-readable fields**: Endpoint pricing, rate limit config, subsidy parameters in state.yaml
+- **Cross-references**: Requires discovery endpoint from `discovering-endpoints`, consumes schemas from `defining-actions`
+- **Temporal markers**: Generation timestamp, middleware version, configuration snapshot

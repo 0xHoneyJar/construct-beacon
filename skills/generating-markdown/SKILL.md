@@ -23,6 +23,7 @@ Generated code adapts to the target codebase's existing patterns.
 - `--route` - Generate only the route handler (server-side content negotiation)
 - `--component` - Generate only the copy button component
 - `--both` - Generate both route handler and component (default)
+- `--llms-txt` or path `llms.txt` - Generate machine-readable site description route
 
 ## Workflow
 
@@ -137,6 +138,48 @@ if (accept.includes('text/markdown')) {
 **Files:**
 - `lib/markdown/page-content.ts` - TypeScript interfaces
 - `lib/markdown/to-markdown.ts` - Conversion function
+
+### Phase 3.5: llms.txt Generation Mode
+
+When invoked as `/add-markdown llms.txt`:
+
+1. **Scan the project** for:
+   - Contract addresses (look for `constants/contracts.ts` or similar)
+   - API routes (glob `app/api/**/route.ts`)
+   - Key pages and features
+   - Package.json for project metadata
+
+2. **Generate `app/llms.txt/route.ts`** following the Vercel pattern:
+   ```typescript
+   export async function GET() {
+     const content = `# {Project Name}
+   > {One-line factual description}
+
+   ## Overview
+   ...
+
+   ## API Endpoints
+   ...
+
+   ## Contracts
+   ...
+   `;
+     return new Response(content, {
+       headers: {
+         'Content-Type': 'text/plain; charset=utf-8',
+         'Cache-Control': 'public, max-age=86400, s-maxage=86400',
+       },
+     });
+   }
+   ```
+
+3. **Content strategy principles**:
+   - **Factual, not marketing** — No superlatives, no promotional language
+   - **Import from source of truth** — Contract addresses from constants file, not hardcoded
+   - **Temporal markers** — "As of {date}" on all time-sensitive claims
+   - **Security warnings** — Mark sensitive endpoints (e.g., "Returns raw transaction calldata")
+   - **Section structure** — Each section has title, description, source reference, last_updated
+   - **24-hour cache** — `Cache-Control: public, max-age=86400, s-maxage=86400`
 
 ### Phase 4: Write Manifest
 
@@ -273,3 +316,18 @@ If no `app/` directory detected:
 1. Warn: "No Next.js App Router detected"
 2. Generate to suggested locations with instructions
 3. Provide alternative integration guide
+
+## Dual-Nature Contract
+
+### As an agent executing this skill:
+- **Input**: Page path, mode flags, or `llms.txt`
+- **Phases**: 1 → 2 → 3 (or 3.5 for llms.txt) → 4 → 5
+- **Decisions**: Detect codebase patterns before generating code. For llms.txt, import contract addresses from source of truth.
+- **Escalation**: If route already exists, ask user before overwriting.
+- **Output**: Generated code files + manifest in `grimoires/beacon/exports/`
+
+### As output consumed by other agents:
+- **Format**: TypeScript route handlers and React components matching codebase conventions
+- **Machine-readable fields**: Manifest includes generated file paths, detected patterns, test commands
+- **Cross-references**: Links to `/audit-llm` and `/optimize-chunks` for content quality
+- **Temporal markers**: Generation timestamp in manifest and comments

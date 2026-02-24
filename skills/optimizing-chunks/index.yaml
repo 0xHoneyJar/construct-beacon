@@ -1,6 +1,6 @@
 name: optimizing-chunks
 slug: optimizing-chunks
-version: 1.0.0
+version: 2.0.0
 description: Analyze content for AI chunk survival. Identifies isolated claims and generates context-carrying rewrites that survive retrieval chunking.
 
 # Trigger patterns - when this skill should activate
@@ -22,9 +22,9 @@ examples:
   - context: "User reviewing pricing content"
     user_says: "My pricing page has numbers without dates. Can you fix that for AI retrieval?"
     agent_action: "Launch optimizing-chunks to find unscoped numbers and add temporal markers"
-  - context: "User preparing documentation"
-    user_says: "Check if these feature descriptions will be misleading when quoted out of context"
-    agent_action: "Launch optimizing-chunks to analyze chunk boundaries and generate self-contained paragraphs"
+  - context: "User has audit results to action"
+    user_says: "Take the audit findings and generate code rewrites for the critical issues"
+    agent_action: "Launch optimizing-chunks in audit report mode to parse findings and generate specific code fixes"
 
 # Domain hints for proactive suggestion
 domain_hints:
@@ -36,13 +36,14 @@ domain_hints:
   - ai-optimization
   - content-resilience
   - paragraph-structure
+  - data-integrity
 
 entry: SKILL.md
 
 capabilities:
   model_tier: sonnet
   danger_level: safe
-  effort_hint: small
+  effort_hint: medium
   downgrade_allowed: true
   execution_hint: parallel
   requires:
@@ -56,3 +57,12 @@ allowed-tools:
   - Write
   - Glob
   - Grep
+
+outputs:
+  - name: optimization-report
+    path: "grimoires/beacon/optimizations/{slug}-chunks.md"
+    format: detailed
+
+categories:
+  - content-optimization
+  - retrieval-resilience

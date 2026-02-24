@@ -134,6 +134,56 @@ For each chunk, scan for these high-risk patterns:
 > ❌ "We are GDPR compliant."
 > ✅ "We are GDPR compliant for EU customers. See [Privacy Policy](/privacy) for details."
 
+---
+
+#### Pattern 6: Data Integrity Fix (CRITICAL RISK)
+
+**Detection:** Code that generates or hardcodes financial/statistical data instead of fetching from live sources.
+
+```regex
+Math\.random\(\)  # Random data in display context
+(?:apr|apy|rate)\s*[=:]\s*['"]?\d+\.?\d*['"]?  # Hardcoded financial values
+\d{3,}\s*\/\s*\(  # Fabricated formulas
+```
+
+**Risk:** AI agents will scrape and cite fabricated data as real, destroying trust and potentially causing financial harm.
+
+**Fix patterns:**
+1. **Connect to live source** — Replace `Math.random()` with API call to real data
+2. **Remove display** — If no live source exists, remove the fabricated display entirely
+3. **Add disclaimer** — If keeping simulated data, add `data-ai-note` attribute:
+   ```html
+   <div data-ai-note="Simulated data. Only current value is live.">
+   ```
+
+**Example:**
+> ❌ `const price = basePrice * (1 + (Math.random() - 0.5) * 0.02)` — Generates fake price history
+> ✅ `const prices = await fetch('/api/price-history?period=24h')` — Fetches real data
+
+---
+
+#### Pattern 7: Contradiction Resolution (HIGH RISK)
+
+**Detection:** Same feature described in conflicting states across different pages or components.
+
+**Check:** For key features, search across all pages for:
+```regex
+(DISCONTINUED|deprecated|removed|ended).*{feature_name}
+(earning|active|enabled|receiving).*{feature_name}
+```
+
+**Risk:** AI agents have no way to determine which claim is authoritative when pages contradict each other.
+
+**Fix patterns:**
+1. **Establish canonical state** — One page is the source of truth
+2. **Add temporal markers** — "As of {date}, {feature} has been {state}"
+3. **Remove stale UI** — Delete components that reference the old state
+4. **Supersession language** — "This supersedes all previous references to {feature}"
+
+**Example:**
+> ❌ Page A: "BGT REWARDS DISCONTINUED" + Page B: "Earning BGT rewards"
+> ✅ All pages: "As of January 2026, BGT reward distribution has ended. See [Announcement](/blog/bgt-update) for details."
+
 ### Phase 4: Generate Recommendations
 
 For each high-risk chunk, generate a recommendation using optimization patterns:
@@ -147,6 +197,18 @@ For each high-risk chunk, generate a recommendation using optimization patterns:
 
 See `resources/templates/` for pattern templates.
 
+### Phase 4.5: Effort Estimation
+
+For each recommendation, classify the implementation effort:
+
+| Effort | Description | Examples |
+|--------|-------------|----------|
+| **Tiny** | Single line change, no logic | Add `data-ai-note` attribute, fix a date string |
+| **Small** | 5-20 lines, single file | Remove a hardcoded value, add temporal marker to a component |
+| **Medium** | 20-100 lines, 2-3 files | Replace `Math.random()` with API call, resolve contradiction cluster across pages |
+
+Include effort estimate in each recommendation's output.
+
 ### Phase 5: Generate Output Report
 
 Create report at: `grimoires/beacon/optimizations/{page-slug}-chunks.md`
@@ -157,6 +219,21 @@ Create report at: `grimoires/beacon/optimizations/{page-slug}-chunks.md`
 3. Summary table
 4. Implementation guide
 5. Next steps
+
+### Phase 5.5: Audit Report Mode
+
+When invoked as `/optimize-chunks --from-audit` or `/optimize-chunks grimoires/beacon/audits/...`:
+
+1. **Parse the audit report** — Extract all findings with severity, file path, line number
+2. **Filter to actionable findings** — Skip informational items, focus on CRITICAL and HIGH
+3. **Generate per-finding code rewrites** — For each finding:
+   - Read the source file at the referenced line
+   - Apply the appropriate pattern (1-7)
+   - Generate before/after code blocks
+   - Estimate effort
+4. **Output as implementation plan** — Ordered by severity, then effort (smallest first)
+
+This mode enables the workflow: `/audit-llm --all` → `/optimize-chunks --from-audit` → apply fixes → re-audit to verify score improvement.
 
 ### Phase 6: Update State
 
@@ -268,3 +345,18 @@ If minimal text found:
 1. Note "Limited text content for analysis"
 2. Recommend adding alt text, captions
 3. Suggest text-based documentation
+
+## Dual-Nature Contract
+
+### As an agent executing this skill:
+- **Input**: Page path, `--from-audit` flag, or audit report path
+- **Phases**: 1 → 2 → 3 → 4 → 4.5 → 5 → 5.5 (if from-audit) → 6
+- **Decisions**: In audit report mode, prioritize CRITICAL findings. In page mode, scan all patterns.
+- **Escalation**: If CRITICAL fabricated data found, flag immediately — don't wait for full report.
+- **Output**: Optimization report in `grimoires/beacon/optimizations/`
+
+### As output consumed by other agents:
+- **Format**: Markdown with before/after code blocks, severity tags, effort estimates
+- **Machine-readable fields**: Finding count by severity, file:line references, pattern applied, effort classification
+- **Cross-references**: Each finding references audit report finding number if in audit-report mode
+- **Temporal markers**: Optimization timestamp, recommended re-audit date

@@ -55,6 +55,31 @@ For each endpoint:
    - Look for return statements
    - Parse response types
 
+#### 2.5 next-safe-action / Zod Detection
+
+Many Next.js projects use `next-safe-action` with Zod schemas for type-safe server actions. Detect these patterns:
+
+```typescript
+// Pattern: next-safe-action with Zod
+import { actionClient } from "@/lib/safe-action";
+import { z } from "zod";
+
+const schema = z.object({
+  prompt: z.string().min(1),
+  style: z.enum(["realistic", "artistic"]),
+});
+
+export const generateImage = actionClient
+  .schema(schema)
+  .action(async ({ parsedInput }) => { ... });
+```
+
+**Detection steps:**
+1. Grep for `next-safe-action` or `actionClient` imports
+2. If found, extract Zod schemas from `.schema()` calls
+3. Convert Zod schemas to JSON Schema (these are more accurate than inferred types)
+4. Note in manifest: "Schemas extracted from next-safe-action/Zod definitions"
+
 ### Phase 3: Generate JSON Schema
 
 For each endpoint, generate `app/api/{path}/schema.json`:
@@ -95,6 +120,41 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/GenerateImageRequest'
+```
+
+### Phase 4.5: OpenAPI Generation Standards
+
+Follow these conventions for production-quality OpenAPI specs:
+
+| Convention | Rule |
+|-----------|------|
+| **Tags** | Group endpoints by domain (e.g., `earn`, `swap`, `profile`, `game`) |
+| **operationIds** | camelCase, descriptive (e.g., `getCombinedAprs`, `verifyQuestCompletion`) |
+| **$ref schemas** | All request/response bodies use `$ref: '#/components/schemas/...'` |
+| **Error responses** | Include 400 (validation), 401 (auth), 402 (payment), 429 (rate limit), 500 (server) |
+| **Security** | Document auth schemes in `securitySchemes` (API key headers, cookie auth) |
+| **Cache info** | Add `x-cache-policy` extension with revalidation strategy |
+| **x-payment** | For x402 endpoints, add `x-payment: { amount, currency, subsidized }` extension |
+| **Descriptions** | Security-sensitive endpoints get explicit warnings (e.g., "Returns raw transaction calldata") |
+
+**Example:**
+```yaml
+paths:
+  /api/earn/aprs:
+    get:
+      operationId: getCombinedAprs
+      tags: [earn]
+      summary: Combined BGT and Beradrome APRs for all vault strikes
+      x-cache-policy:
+        strategy: edge-revalidate
+        ttl: 300
+      responses:
+        '200':
+          description: APR data by strike tier
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CombinedAprsResponse'
 ```
 
 ### Phase 5: Update State
@@ -194,3 +254,18 @@ For nested objects:
 1. Generate nested schema structure
 2. Use `$ref` for reusable components
 3. Place shared schemas in `/components/schemas`
+
+## Dual-Nature Contract
+
+### As an agent executing this skill:
+- **Input**: Optional endpoint path, discovery endpoint data
+- **Phases**: 1 → 2 → 2.5 → 3 → 4 → 4.5 → 5
+- **Decisions**: If Zod schemas exist, use them over inferred types. If discovery endpoint exists, use its endpoint list.
+- **Escalation**: If no type information available, generate minimal schema and flag for manual refinement.
+- **Output**: JSON Schema per endpoint + combined OpenAPI spec in `grimoires/beacon/discovery/`
+
+### As output consumed by other agents:
+- **Format**: JSON Schema files + OpenAPI 3.0.3 YAML
+- **Machine-readable fields**: Full request/response schemas, operationIds, tags, security schemes
+- **Cross-references**: Consumes API inventory from `discovering-endpoints`, consumed by agent SDKs
+- **Temporal markers**: Generation timestamp, spec version, schema source (Zod/inferred/manual)

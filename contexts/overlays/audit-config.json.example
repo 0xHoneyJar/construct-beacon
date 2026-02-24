@@ -1,0 +1,28 @@
+{
+  "known_data_sources": [
+    "CoinGecko API",
+    "DeFi Llama",
+    "On-chain contract reads"
+  ],
+  "deprecated_features": [
+    {
+      "feature": "Legacy rewards",
+      "deprecated_date": "2025-01-01",
+      "replacement": "New staking program"
+    }
+  ],
+  "brand_terms": [
+    "YourBrand",
+    "YourToken"
+  ],
+  "financial_data_patterns": [
+    {
+      "pattern": "Math\\.random\\(\\)",
+      "expected_source": "Should use live API data"
+    },
+    {
+      "pattern": "\\b\\d+\\.\\d{2}%\\b",
+      "expected_source": "APR/APY values must come from on-chain or oracle data"
+    }
+  ]
+}
