@@ -1,0 +1,28 @@
+# scripts/MANIFEST.yaml — Machine-readable tool declarations
+#
+# Lets agents discover what scripts are available, how to invoke them,
+# and what to expect back — without reading source code.
+
+scripts:
+
+  - name: validate
+    description: "Validate Beacon construct integrity — checks construct.yaml, skill index.yaml files, JSON schemas, state.yaml, SKILL.md contracts, and report templates"
+    entry: validate.sh
+    runtime: bash
+    args:
+      - name: PROJECT_ROOT
+        type: path
+        required: false
+        positional: true
+        default: "."
+        description: "Path to the project root (for locating grimoires/beacon/state.yaml)"
+    output:
+      format: text
+      fields:
+        pass_count: "integer — number of checks passed"
+        fail_count: "integer — number of checks failed"
+        warn_count: "integer — number of warnings"
+        result: "string — VALIDATION PASSED or VALIDATION FAILED"
+    side_effects: []
+    credentials: []
+    danger_level: safe
