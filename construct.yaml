@@ -2,7 +2,7 @@ schema_version: 3
 name: Sigil of the Beacon
 slug: beacon
 version: 2.0.0
-description: Signal readiness to the agent network with AI-retrievable content, trust auditing, and x402 payment endpoints
+description: Makes your project discoverable to the agent network. AI-retrievable content, trust signals, and x402 payment endpoints — the infrastructure that lets other constructs find and verify you.
 short_description: "AI-retrievable trust signals"
 domain:
   - operations
