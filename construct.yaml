@@ -59,6 +59,9 @@ events:
         endpoint_path: string
         pricing: object
   consumes: []
+composition_paths:
+  writes:
+    - "grimoires/beacon/"
 identity:
   persona: identity/persona.yaml
   expertise: identity/expertise.yaml
