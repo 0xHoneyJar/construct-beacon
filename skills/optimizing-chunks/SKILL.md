@@ -190,6 +190,64 @@ Math\.random\(\)  # Random data in display context
 > ❌ Page A: "BGT REWARDS DISCONTINUED" + Page B: "Earning BGT rewards"
 > ✅ All pages: "As of January 2026, BGT reward distribution has ended. See [Announcement](/blog/bgt-update) for details."
 
+### Phase 3.5: Citability Tagging
+
+Complement risk detection ("what can go wrong") with opportunity detection ("what's strong"). For each chunk, assess citability — the likelihood that an AI system will select and correctly cite this paragraph.
+
+#### Citability Labels
+
+Use qualitative labels with reasoning, NOT numeric scores:
+
+| Label | Criteria | Example |
+|-------|----------|---------|
+| **[HIGH CITABILITY]** | Self-contained paragraph with specific data + source + date. Can be quoted in isolation without losing meaning. | "As of January 2026, the platform processes $2.3M in daily volume across 12 supported tokens. Source: [Dashboard](/stats)." |
+| **[MODERATE CITABILITY]** | Has some context markers but missing one element (date, source, or scope). Could be misinterpreted if isolated. | "We support 12 tokens for swapping." (missing date, missing link to canonical source) |
+| **[LOW CITABILITY]** | Context-dependent, vague, or missing temporal markers. Will likely be ignored or misquoted by AI systems. | "Our platform is the best way to swap tokens." |
+
+#### Tagging Process
+
+1. **For each paragraph-level chunk**, assign a citability label
+2. **Include reasoning** — what makes it citable or not
+3. **For [HIGH CITABILITY] chunks** — note the enrichment techniques present:
+   - Quotation addition (highest impact per GEO paper)
+   - Statistic inclusion with source
+   - Temporal scoping
+   - Source linking
+4. **For [LOW CITABILITY] chunks** — note what's missing and suggest the single highest-impact enrichment
+
+#### Research Basis
+
+GEO paper (Princeton/Georgia Tech, KDD 2024) found content enrichment techniques improve AI visibility up to 40%. Most effective techniques ranked:
+
+1. **Quotation addition** — citing authoritative sources inline
+2. **Statistic inclusion** — specific numbers with methodology
+3. **Source citation** — linking to canonical references
+4. **Fluency optimization** — clear, parseable sentence structure
+
+**Confidence: HIGH** — peer-reviewed, replicated across multiple AI platforms.
+
+#### Output
+
+Include a Citability Summary section in the optimization report:
+
+```
+## Citability Summary
+
+| Label | Count | % of Chunks |
+|-------|-------|-------------|
+| HIGH CITABILITY | {count} | {pct}% |
+| MODERATE CITABILITY | {count} | {pct}% |
+| LOW CITABILITY | {count} | {pct}% |
+
+### Strongest Chunks
+{top 3 HIGH CITABILITY chunks with file:line references}
+
+### Quick Wins
+{top 3 LOW → MODERATE upgrades requiring minimal effort}
+```
+
+---
+
 ### Phase 4: Generate Recommendations
 
 For each high-risk chunk, generate a recommendation using optimization patterns:
@@ -261,6 +319,19 @@ optimizations:
       high_risk: {count}
       optimized: "{timestamp}"
 ```
+
+### Phase 6.5: Event Emission
+
+After all phases complete, emit the declared event:
+
+```yaml
+event: forge.beacon.chunks_optimized
+data:
+  page_slug: "{path}"
+  findings_count: {total_findings}
+```
+
+---
 
 ## Risk Scoring
 
@@ -363,7 +434,7 @@ If minimal text found:
 
 ### As an agent executing this skill:
 - **Input**: Page path, `--from-audit` flag, or audit report path
-- **Phases**: 1 → 2 → 3 → 4 → 4.5 → 5 → 5.5 (if from-audit) → 6
+- **Phases**: 1 → 2 → 3 → 3.5 → 4 → 4.5 → 5 → 5.5 (if from-audit) → 6 → 6.5
 - **Decisions**: In audit report mode, prioritize CRITICAL findings. In page mode, scan all patterns.
 - **Escalation**: If CRITICAL fabricated data found, flag immediately — don't wait for full report.
 - **Output**: Optimization report in `grimoires/beacon/optimizations/`

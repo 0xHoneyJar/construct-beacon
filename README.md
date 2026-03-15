@@ -58,6 +58,12 @@ graph LR
 
 ---
 
+## Target Framework
+
+Next.js (App Router). Four of six skills generate code that assumes `app/` directory routing, `route.ts` handlers, and React Server Components. Non-Next.js projects can still use `auditing-content` and `optimizing-chunks` (content analysis only).
+
+---
+
 ## Identity
 
 | Attribute | Value |

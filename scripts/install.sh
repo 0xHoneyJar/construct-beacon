@@ -24,7 +24,6 @@ mkdir -p "$GRIMOIRE_DIR/audits"
 mkdir -p "$GRIMOIRE_DIR/exports"
 mkdir -p "$GRIMOIRE_DIR/optimizations"
 mkdir -p "$GRIMOIRE_DIR/discovery"
-mkdir -p "$GRIMOIRE_DIR/sync"
 
 echo "✓ Created grimoire structure at $GRIMOIRE_DIR"
 
@@ -67,30 +66,6 @@ actions:
 payments:
   middleware_generated: false
   last_generation: null
-
-layer_scores:
-  source_legitimacy: null
-  claim_verifiability: null
-  cross_source_consistency: null
-  contextual_integrity: null
-  structural_cues: null
-
-critical_findings: []
-
-artifacts:
-  llms_txt:
-    status: pending
-  api_schemas:
-    status: pending
-  content_chunks:
-    status: pending
-
-recommendations:
-  p0_count: 0
-  p1_count: 0
-  p2_count: 0
-  estimated_score_after_p0: null
-  ai_ready_threshold: 7.0
 YAML
     echo "✓ Initialized state.yaml"
 else

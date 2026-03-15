@@ -207,6 +207,19 @@ exports:
         - {file2}
 ```
 
+### Phase 5.5: Event Emission
+
+After all phases complete, emit the declared event:
+
+```yaml
+event: forge.beacon.markdown_generated
+data:
+  page_path: "{path}"
+  mode: "{route|component|both|llms-txt}"
+```
+
+---
+
 ## Pattern Detection Summary
 
 | Pattern | Detection Method | Template Variable |
@@ -321,7 +334,7 @@ If no `app/` directory detected:
 
 ### As an agent executing this skill:
 - **Input**: Page path, mode flags, or `llms.txt`
-- **Phases**: 1 → 2 → 3 (or 3.5 for llms.txt) → 4 → 5
+- **Phases**: 1 → 2 → 3 (or 3.5 for llms.txt) → 4 → 5 → 5.5
 - **Decisions**: Detect codebase patterns before generating code. For llms.txt, import contract addresses from source of truth.
 - **Escalation**: If route already exists, ask user before overwriting.
 - **Output**: Generated code files + manifest in `grimoires/beacon/exports/`

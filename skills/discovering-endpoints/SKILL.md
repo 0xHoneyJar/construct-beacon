@@ -135,12 +135,25 @@ This inventory is consumed by `defining-actions` for OpenAPI generation and by `
 Update `grimoires/beacon/state.yaml`:
 ```yaml
 discovery:
-  generated: true
-  generated_at: "{timestamp}"
+  count: {increment}
+  last_generation: "{timestamp}"
   endpoints:
     - path: /api/generate-image
       price: "1 {context:chain_config.default_token}"
 ```
+
+### Phase 6.5: Event Emission
+
+After all phases complete, emit the declared event:
+
+```yaml
+event: forge.beacon.discovery_generated
+data:
+  endpoint_path: "/.well-known/x402"
+  service_name: "{{SERVICE_NAME}}"
+```
+
+---
 
 ## Protocol Reference
 
@@ -230,7 +243,7 @@ If no `app/` directory:
 
 ### As an agent executing this skill:
 - **Input**: Optional service name, chain config context overlay
-- **Phases**: 1 → 2 → 3 → 4 → 5 → 5.5 → 6
+- **Phases**: 1 → 2 → 3 → 4 → 5 → 5.5 → 6 → 6.5
 - **Decisions**: If reality files exist, auto-detect. If not, prompt user. Generate API inventory alongside discovery endpoint.
 - **Escalation**: If no API routes found, ask user to specify endpoints manually.
 - **Output**: Discovery endpoint + API inventory + manifest in `grimoires/beacon/discovery/`

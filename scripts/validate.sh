@@ -65,10 +65,12 @@ echo ""
 
 # --- 3. JSON Schema files ---
 echo "Checking JSON schemas..."
-for f in "$PACK_DIR"/contexts/schemas/*.json; do
+for f in "$PACK_DIR"/contexts/schemas/*.json "$PACK_DIR"/schemas/state.schema.json; do
     BASENAME=$(basename "$f")
-    if python3 -c "import json; json.load(open('$f'))" 2>/dev/null; then
+    if [ -f "$f" ] && python3 -c "import json; json.load(open('$f'))" 2>/dev/null; then
         pass "$BASENAME: valid JSON"
+    elif [ ! -f "$f" ]; then
+        fail "$BASENAME: file not found"
     else
         fail "$BASENAME: invalid JSON"
     fi
@@ -89,7 +91,7 @@ echo ""
 echo "Checking state.yaml structure..."
 STATE_FILE="$PROJECT_ROOT/grimoires/beacon/state.yaml"
 if [ -f "$STATE_FILE" ]; then
-    REQUIRED_KEYS="schema_version construct_version audits exports optimizations layer_scores critical_findings artifacts recommendations"
+    REQUIRED_KEYS="schema_version construct_version audits exports optimizations discovery actions payments"
     MISSING=""
     for key in $REQUIRED_KEYS; do
         if ! python3 -c "import yaml; d=yaml.safe_load(open('$STATE_FILE')); assert '$key' in d" 2>/dev/null; then

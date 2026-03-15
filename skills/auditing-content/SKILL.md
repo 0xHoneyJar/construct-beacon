@@ -19,6 +19,17 @@ This skill audits pages against a 5-layer trust model based on how LLMs evaluate
 
 ## Workflow
 
+### Phase 0: Configuration Loading
+
+1. **Check for audit-config overlay** at `contexts/overlays/audit-config.json`
+   - If present, load and apply:
+     - `brand_terms` — use for entity recognition in Layer 1 (Source Legitimacy)
+     - `deprecated_features` — use for contradiction detection in Layer 3 and Pattern 7
+     - `financial_data_patterns` — use for code scanning in Phase 1.75
+     - `known_data_sources` — use to validate data source references
+   - If not present, proceed with defaults (no project-specific patterns)
+   - Validate against `contexts/schemas/audit-config.schema.json` if present
+
 ### Phase 1: Content Discovery
 
 1. **Locate the target content**
@@ -36,9 +47,49 @@ This skill audits pages against a 5-layer trust model based on how LLMs evaluate
    - Identify all text content, headings, claims, numbers, links
    - Note line numbers for each finding
 
-### Phase 1.5: Code Pattern Scanning
+### Phase 1.5: Crawler Reachability Check
 
-Before analyzing content semantics, scan for code-level fabrication and dead code patterns. These are the highest-value findings from real deployments.
+Before analyzing content, check whether AI crawlers can reach the site. This is a lightweight pre-flight — not a full crawler verification.
+
+1. **Locate robots.txt**
+   ```
+   Search for:
+   - public/robots.txt (static file)
+   - app/robots.ts or app/robots.txt/route.ts (dynamic generation)
+   ```
+
+2. **Check for AI crawler directives**
+
+   Scan for `User-agent` directives targeting these crawlers:
+
+   | Crawler | Operator | Purpose |
+   |---------|----------|---------|
+   | `GPTBot` | OpenAI | ChatGPT Browse, training |
+   | `OAI-SearchBot` | OpenAI | ChatGPT search results |
+   | `ClaudeBot` | Anthropic | Claude web access |
+   | `PerplexityBot` | Perplexity | Search and citation |
+   | `Googlebot` | Google | Google AI Overviews (indirect) |
+
+3. **Flag conditions**
+
+   | Condition | Severity | Note |
+   |-----------|----------|------|
+   | All AI crawlers blocked (`Disallow: /`) | HIGH | May be unintentional — verify with site owner |
+   | Some AI crawlers blocked selectively | MEDIUM | Intentional access control — note which are blocked |
+   | x402 endpoints enabled but AI crawlers blocked | HIGH | Contradiction: advertising to agents while blocking their crawlers |
+   | No robots.txt found | LOW | Default behavior is allow-all |
+
+4. **Limitations note**
+
+   Include in report: "robots.txt does not control Google AI Overviews, Bing Copilot, or non-compliant crawlers. Content may appear in AI-generated summaries even when crawlers are blocked, as these systems can source from existing search indexes."
+
+5. **Record findings** as a pre-flight section in the audit report, before Trust Layer Analysis.
+
+---
+
+### Phase 1.75: Code Pattern Scanning
+
+Before analyzing content semantics, scan for code-level fabrication and dead code patterns.
 
 #### Fabrication Patterns
 
@@ -68,6 +119,33 @@ For each detection, record:
 ### Phase 2: Trust Layer Analysis
 
 Score each layer on a 0-10 scale based on the checklist items found.
+
+#### Scoring Methodology Note
+
+Each layer uses 4 binary checklist items, producing 5 possible scores: {0, 2.5, 5, 7.5, 10}. This is intentional — the coarse granularity forces clear pass/fail decisions per item rather than subjective interpolation. The resolution is sufficient for identifying risk categories (High 0-4, Medium 4-7, Low 7-10) while remaining reproducible across different auditors.
+
+#### Layer Weight Rationale
+
+| Layer | Weight | Why |
+|-------|--------|-----|
+| Source Legitimacy | 20% | Foundation — without attribution, other signals are moot, but many pages pass this trivially |
+| Claim Verifiability | 25% | Highest-impact for AI misquotation — unverifiable claims are the primary vector for brand misrepresentation |
+| Cross-Source Consistency | 20% | Important but only assessable in multi-page mode — weighted to not dominate |
+| Contextual Integrity | 25% | Matches Claim Verifiability — isolated chunks without context cause the most real-world harm |
+| Structural Cues | 10% | Necessary but lowest direct impact on AI citation quality |
+
+#### Single-Page Mode
+
+When auditing a single page (not `--all`), Layer 3 (Cross-Source Consistency, 20% weight) cannot be fully assessed — there are no other pages to compare against. Handle this explicitly:
+
+1. **Mark Layer 3 as "Not assessed"** in the report
+2. **Reweight remaining layers** for single-page score calculation:
+   ```
+   Single-Page Score = (L1 × 0.25) + (L2 × 0.3125) + (L4 × 0.3125) + (L5 × 0.125)
+   ```
+   (Original weights divided by 0.80, the sum of non-L3 weights)
+3. **Include advisory**: "Cross-source consistency was not assessed. Run `/audit-llm --all` for full scoring including cross-page validation."
+4. **If canonical signals are present on the page** (e.g., `rel="canonical"`, `dateModified`), note these positively even without cross-page comparison
 
 ---
 
@@ -126,7 +204,7 @@ Score each layer on a 0-10 scale based on the checklist items found.
 - 1/4 items = 2.5 points
 - 0/4 items = 0 points
 
-**Note**: This layer may require checking other pages. If unable to verify, score conservatively and note "Unable to verify cross-source consistency."
+**Note**: In single-page mode, this layer is marked "Not assessed" and its weight is redistributed. See **Single-Page Mode** above. In `--all` mode, verify across all discovered pages.
 
 - [ ] **Contradiction cluster detection** - Multiple pages simultaneously asserting and denying the same feature state (e.g., "Feature X DISCONTINUED" banner + "Earning Feature X" label on the same or adjacent pages)
 
@@ -173,8 +251,14 @@ Score each layer on a 0-10 scale based on the checklist items found.
 
 ### Phase 3: Calculate Overall Score
 
+**Full-site mode (`--all`):**
 ```
 Overall Score = (L1 × 0.20) + (L2 × 0.25) + (L3 × 0.20) + (L4 × 0.25) + (L5 × 0.10)
+```
+
+**Single-page mode** (Layer 3 not assessed):
+```
+Overall Score = (L1 × 0.25) + (L2 × 0.3125) + (L4 × 0.3125) + (L5 × 0.125)
 ```
 
 **Risk Level Mapping:**
@@ -248,6 +332,12 @@ When invoked as `/audit-llm --all`:
 | Post-P1 | {estimate}/10 | After fixing HIGH findings |
 | AI-Ready | 7.0+/10 | Threshold for agent consumption |
 
+**Score Progression Formula:**
+- For each CRITICAL finding, estimate the layer score improvement if fixed. A CRITICAL finding in Layer 5 (Structural Cues) that fails the "code-level structural cues" checklist item would improve that layer by 2.5 points (one checklist item).
+- `Post-P0 = Current + sum(per-finding layer improvements × layer weight)` for CRITICAL findings
+- `Post-P1 = Post-P0 + sum(per-finding layer improvements × layer weight)` for HIGH findings
+- Cap each layer at 10. These are estimates — actual re-audit may differ.
+
 Write full-site report to: `grimoires/beacon/audits/{app}-full-audit.md`
 
 Use the template from `resources/templates/full-audit-report.md`.
@@ -265,6 +355,39 @@ audits:
       risk: {high|medium|low}
       audited: "{timestamp}"
 ```
+
+### Phase 6.5: Trust Scorecard Synthesis (after `--all` mode)
+
+After a full-site audit, aggregate all individual audit reports into a trust scorecard.
+
+1. **Read all audit reports** from `grimoires/beacon/audits/`
+2. **Extract per-page scores** — overall score, per-layer scores, risk level
+3. **Calculate aggregates:**
+   - Average score across all pages
+   - High/medium/low risk page counts
+   - Per-layer averages and weighted scores
+   - Common issues across pages (by frequency)
+   - Weakest and strongest layers
+4. **Populate trust-scorecard template** from `resources/templates/trust-scorecard.md`
+5. **Write** to `grimoires/beacon/audits/trust-scorecard.md`
+
+The scorecard provides a single-view dashboard of site-wide AI readiness.
+
+### Phase 7: Event Emission
+
+After all phases complete, emit the declared event:
+
+```yaml
+event: forge.beacon.audit_completed
+data:
+  page_slug: "{path}"
+  score: {overall_score}
+  risk_level: "{high|medium|low}"
+```
+
+Even without consumers today, emitting events enables future inter-construct workflows (e.g., triggering `/optimize-chunks` automatically when a page scores below threshold).
+
+---
 
 ## Output Format
 
@@ -327,7 +450,7 @@ If content is fetched client-side:
 
 ### As an agent executing this skill:
 - **Input**: Page path or `--all` flag
-- **Phases**: 1 → 1.5 → 2 → 3 → 4 → 4.5 → 5 → 5.5 (if --all) → 6
+- **Phases**: 0 → 1 → 1.5 → 1.75 → 2 → 3 → 4 → 4.5 → 5 → 5.5 (if --all) → 6 → 6.5 (if --all) → 7
 - **Decisions**: If `--all`, run pages in parallel. If single page, run sequentially.
 - **Escalation**: If score < 4.0, recommend immediate `/optimize-chunks` follow-up.
 - **Output**: Audit report in `grimoires/beacon/audits/`
