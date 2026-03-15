@@ -102,6 +102,22 @@ Overall Score:                                    {overall_score}/10
 
 ---
 
+## Beyond Your Codebase
+
+Source code auditing can only influence a subset of AI citation factors. These off-site signals also affect how AI platforms cite your content:
+
+| Signal | Correlation with AI Citation | Action |
+|--------|------------------------------|--------|
+| Brand mentions (YouTube, Reddit, Wikipedia) | 0.66 (Ahrefs Nov 2025) | Build brand presence on platforms AI models reference |
+| Backlinks from authoritative domains | 0.218 (Ahrefs Nov 2025) | Less impactful than brand mentions for AI, but still relevant for Google AIO |
+| `sameAs` in Schema.org | N/A (structural signal) | Link your site to official social/Wikipedia profiles via JSON-LD `sameAs` property |
+
+> **Note:** Brand mentions correlate 3x more strongly with AI citation than traditional backlinks. This inverts the SEO assumption that link-building is the primary off-site lever.
+>
+> See `resources/references/platform-citation-profiles.md` for per-platform citation behaviors.
+
+---
+
 ## Next Steps
 
 1. **Fix high-risk claims**: Run `/optimize-chunks {path}` to get rewrite recommendations
