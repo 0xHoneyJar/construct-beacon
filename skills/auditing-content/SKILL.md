@@ -19,6 +19,17 @@ This skill audits pages against a 5-layer trust model based on how LLMs evaluate
 
 ## Workflow
 
+### Phase 0: Configuration Loading
+
+1. **Check for audit-config overlay** at `contexts/overlays/audit-config.json`
+   - If present, load and apply:
+     - `brand_terms` — use for entity recognition in Layer 1 (Source Legitimacy)
+     - `deprecated_features` — use for contradiction detection in Layer 3 and Pattern 7
+     - `financial_data_patterns` — use for code scanning in Phase 1.75
+     - `known_data_sources` — use to validate data source references
+   - If not present, proceed with defaults (no project-specific patterns)
+   - Validate against `contexts/schemas/audit-config.schema.json` if present
+
 ### Phase 1: Content Discovery
 
 1. **Locate the target content**
@@ -306,6 +317,39 @@ audits:
       audited: "{timestamp}"
 ```
 
+### Phase 6.5: Trust Scorecard Synthesis (after `--all` mode)
+
+After a full-site audit, aggregate all individual audit reports into a trust scorecard.
+
+1. **Read all audit reports** from `grimoires/beacon/audits/`
+2. **Extract per-page scores** — overall score, per-layer scores, risk level
+3. **Calculate aggregates:**
+   - Average score across all pages
+   - High/medium/low risk page counts
+   - Per-layer averages and weighted scores
+   - Common issues across pages (by frequency)
+   - Weakest and strongest layers
+4. **Populate trust-scorecard template** from `resources/templates/trust-scorecard.md`
+5. **Write** to `grimoires/beacon/audits/trust-scorecard.md`
+
+The scorecard provides a single-view dashboard of site-wide AI readiness.
+
+### Phase 7: Event Emission
+
+After all phases complete, emit the declared event:
+
+```yaml
+event: forge.beacon.audit_completed
+data:
+  page_slug: "{path}"
+  score: {overall_score}
+  risk_level: "{high|medium|low}"
+```
+
+Even without consumers today, emitting events enables future inter-construct workflows (e.g., triggering `/optimize-chunks` automatically when a page scores below threshold).
+
+---
+
 ## Output Format
 
 See `resources/templates/audit-report.md` for the full template.
@@ -367,7 +411,7 @@ If content is fetched client-side:
 
 ### As an agent executing this skill:
 - **Input**: Page path or `--all` flag
-- **Phases**: 1 → 1.5 → 1.75 → 2 → 3 → 4 → 4.5 → 5 → 5.5 (if --all) → 6
+- **Phases**: 0 → 1 → 1.5 → 1.75 → 2 → 3 → 4 → 4.5 → 5 → 5.5 (if --all) → 6 → 6.5 (if --all) → 7
 - **Decisions**: If `--all`, run pages in parallel. If single page, run sequentially.
 - **Escalation**: If score < 4.0, recommend immediate `/optimize-chunks` follow-up.
 - **Output**: Audit report in `grimoires/beacon/audits/`

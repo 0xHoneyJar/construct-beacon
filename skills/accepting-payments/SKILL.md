@@ -173,6 +173,19 @@ payments:
     daily_subsidy: 1000
 ```
 
+### Phase 7.5: Event Emission
+
+After all phases complete, emit the declared event:
+
+```yaml
+event: forge.beacon.middleware_generated
+data:
+  endpoint_path: "{first_endpoint_path}"
+  pricing: {pricing_config_object}
+```
+
+---
+
 ## x402 v2 Protocol Reference
 
 ### Request Flow
@@ -332,7 +345,7 @@ Next steps:
 
 ### As an agent executing this skill:
 - **Input**: Endpoint paths, pricing, subsidy config, chain config context overlay
-- **Phases**: 1 → 1.5 → 2 → 3 → 4 → 5 → 6 → 7
+- **Phases**: 1 → 1.5 → 2 → 3 → 4 → 5 → 6 → 7 → 7.5
 - **Decisions**: Check rate limiting before generating middleware. Integrate with existing systems when possible.
 - **Escalation**: If no discovery endpoint exists, recommend `/beacon-discover` first. If no rate limiting exists, warn and include mandatory rate limiter.
 - **Output**: Middleware + rate limiter + hooks in `lib/x402/`

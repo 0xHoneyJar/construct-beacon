@@ -320,6 +320,19 @@ optimizations:
       optimized: "{timestamp}"
 ```
 
+### Phase 6.5: Event Emission
+
+After all phases complete, emit the declared event:
+
+```yaml
+event: forge.beacon.chunks_optimized
+data:
+  page_slug: "{path}"
+  findings_count: {total_findings}
+```
+
+---
+
 ## Risk Scoring
 
 ### Per-Chunk Score
@@ -421,7 +434,7 @@ If minimal text found:
 
 ### As an agent executing this skill:
 - **Input**: Page path, `--from-audit` flag, or audit report path
-- **Phases**: 1 → 2 → 3 → 3.5 → 4 → 4.5 → 5 → 5.5 (if from-audit) → 6
+- **Phases**: 1 → 2 → 3 → 3.5 → 4 → 4.5 → 5 → 5.5 (if from-audit) → 6 → 6.5
 - **Decisions**: In audit report mode, prioritize CRITICAL findings. In page mode, scan all patterns.
 - **Escalation**: If CRITICAL fabricated data found, flag immediately — don't wait for full report.
 - **Output**: Optimization report in `grimoires/beacon/optimizations/`

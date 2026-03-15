@@ -175,6 +175,19 @@ actions:
     - /api/mint
 ```
 
+### Phase 5.5: Event Emission
+
+After all phases complete, emit the declared event:
+
+```yaml
+event: forge.beacon.actions_defined
+data:
+  endpoints_count: {schemas_generated}
+  openapi_path: "grimoires/beacon/discovery/openapi.yaml"
+```
+
+---
+
 ## Schema Generation Rules
 
 ### Request Body Detection
@@ -264,7 +277,7 @@ For nested objects:
 
 ### As an agent executing this skill:
 - **Input**: Optional endpoint path, discovery endpoint data
-- **Phases**: 1 → 2 → 2.5 → 3 → 4 → 4.5 → 5
+- **Phases**: 1 → 2 → 2.5 → 3 → 4 → 4.5 → 5 → 5.5
 - **Decisions**: If Zod schemas exist, use them over inferred types. If discovery endpoint exists, use its endpoint list.
 - **Escalation**: If no type information available, generate minimal schema and flag for manual refinement.
 - **Output**: JSON Schema per endpoint + combined OpenAPI spec in `grimoires/beacon/discovery/`
