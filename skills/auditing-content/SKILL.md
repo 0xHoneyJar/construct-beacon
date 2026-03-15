@@ -36,9 +36,49 @@ This skill audits pages against a 5-layer trust model based on how LLMs evaluate
    - Identify all text content, headings, claims, numbers, links
    - Note line numbers for each finding
 
-### Phase 1.5: Code Pattern Scanning
+### Phase 1.5: Crawler Reachability Check
 
-Before analyzing content semantics, scan for code-level fabrication and dead code patterns. These are the highest-value findings from real deployments.
+Before analyzing content, check whether AI crawlers can reach the site. This is a lightweight pre-flight — not a full crawler verification.
+
+1. **Locate robots.txt**
+   ```
+   Search for:
+   - public/robots.txt (static file)
+   - app/robots.ts or app/robots.txt/route.ts (dynamic generation)
+   ```
+
+2. **Check for AI crawler directives**
+
+   Scan for `User-agent` directives targeting these crawlers:
+
+   | Crawler | Operator | Purpose |
+   |---------|----------|---------|
+   | `GPTBot` | OpenAI | ChatGPT Browse, training |
+   | `OAI-SearchBot` | OpenAI | ChatGPT search results |
+   | `ClaudeBot` | Anthropic | Claude web access |
+   | `PerplexityBot` | Perplexity | Search and citation |
+   | `Googlebot` | Google | Google AI Overviews (indirect) |
+
+3. **Flag conditions**
+
+   | Condition | Severity | Note |
+   |-----------|----------|------|
+   | All AI crawlers blocked (`Disallow: /`) | HIGH | May be unintentional — verify with site owner |
+   | Some AI crawlers blocked selectively | MEDIUM | Intentional access control — note which are blocked |
+   | x402 endpoints enabled but AI crawlers blocked | HIGH | Contradiction: advertising to agents while blocking their crawlers |
+   | No robots.txt found | LOW | Default behavior is allow-all |
+
+4. **Limitations note**
+
+   Include in report: "robots.txt does not control Google AI Overviews, Bing Copilot, or non-compliant crawlers. Content may appear in AI-generated summaries even when crawlers are blocked, as these systems can source from existing search indexes."
+
+5. **Record findings** as a pre-flight section in the audit report, before Trust Layer Analysis.
+
+---
+
+### Phase 1.75: Code Pattern Scanning
+
+Before analyzing content semantics, scan for code-level fabrication and dead code patterns.
 
 #### Fabrication Patterns
 
@@ -327,7 +367,7 @@ If content is fetched client-side:
 
 ### As an agent executing this skill:
 - **Input**: Page path or `--all` flag
-- **Phases**: 1 → 1.5 → 2 → 3 → 4 → 4.5 → 5 → 5.5 (if --all) → 6
+- **Phases**: 1 → 1.5 → 1.75 → 2 → 3 → 4 → 4.5 → 5 → 5.5 (if --all) → 6
 - **Decisions**: If `--all`, run pages in parallel. If single page, run sequentially.
 - **Escalation**: If score < 4.0, recommend immediate `/optimize-chunks` follow-up.
 - **Output**: Audit report in `grimoires/beacon/audits/`
