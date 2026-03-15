@@ -135,8 +135,8 @@ This inventory is consumed by `defining-actions` for OpenAPI generation and by `
 Update `grimoires/beacon/state.yaml`:
 ```yaml
 discovery:
-  generated: true
-  generated_at: "{timestamp}"
+  count: {increment}
+  last_generation: "{timestamp}"
   endpoints:
     - path: /api/generate-image
       price: "1 {context:chain_config.default_token}"

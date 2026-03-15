@@ -1,6 +1,9 @@
 # Expertise: Beacon
 # Domain knowledge for SEO, structured data, and content discoverability.
 
+target_framework: "Next.js (App Router)"
+framework_note: "4/6 skills generate code assuming app/ directory routing. auditing-content and optimizing-chunks are framework-agnostic."
+
 domains:
   - name: "Structured Data"
     depth: 5

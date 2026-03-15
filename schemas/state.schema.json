@@ -1,0 +1,207 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Beacon State",
+  "description": "Tracks audit, export, optimization, discovery, action, and payment state across sessions.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "construct_version",
+    "initialized",
+    "audits",
+    "exports",
+    "optimizations",
+    "discovery",
+    "actions",
+    "payments"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 2,
+      "description": "State file schema version"
+    },
+    "construct_version": {
+      "type": "string",
+      "description": "Construct version that created this state"
+    },
+    "initialized": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when state was first created"
+    },
+    "last_activity": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "Timestamp of last skill execution"
+    },
+    "audits": {
+      "type": "object",
+      "required": ["count", "last_audit", "pages"],
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total audits performed"
+        },
+        "last_audit": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "Timestamp of most recent audit"
+        },
+        "pages": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "score": { "type": "number", "minimum": 0, "maximum": 10 },
+              "risk": { "type": "string", "enum": ["high", "medium", "low"] },
+              "audited": { "type": "string", "format": "date-time" }
+            }
+          },
+          "description": "Per-page audit results keyed by path"
+        }
+      }
+    },
+    "exports": {
+      "type": "object",
+      "required": ["count", "last_generation", "pages"],
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total markdown exports generated"
+        },
+        "last_generation": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "Timestamp of most recent export"
+        },
+        "pages": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "mode": { "type": "string", "enum": ["route", "component", "both"] },
+              "generated": { "type": "string", "format": "date-time" },
+              "files": { "type": "array", "items": { "type": "string" } }
+            }
+          },
+          "description": "Per-page export results keyed by path"
+        }
+      }
+    },
+    "optimizations": {
+      "type": "object",
+      "required": ["count", "last_optimization", "pages"],
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total optimization runs performed"
+        },
+        "last_optimization": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "Timestamp of most recent optimization"
+        },
+        "pages": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "chunks_analyzed": { "type": "integer" },
+              "high_risk": { "type": "integer" },
+              "optimized": { "type": "string", "format": "date-time" }
+            }
+          },
+          "description": "Per-page optimization results keyed by path"
+        }
+      }
+    },
+    "discovery": {
+      "type": "object",
+      "required": ["count", "last_generation"],
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total discovery endpoints generated"
+        },
+        "last_generation": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "Timestamp of most recent discovery generation"
+        },
+        "endpoints": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "path": { "type": "string" },
+              "price": { "type": "string" }
+            }
+          },
+          "description": "Registered discovery endpoints"
+        }
+      }
+    },
+    "actions": {
+      "type": "object",
+      "required": ["schemas_generated", "last_generation"],
+      "properties": {
+        "schemas_generated": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of JSON schemas generated"
+        },
+        "last_generation": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "Timestamp of most recent schema generation"
+        },
+        "endpoints": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Endpoint paths with generated schemas"
+        }
+      }
+    },
+    "payments": {
+      "type": "object",
+      "required": ["middleware_generated", "last_generation"],
+      "properties": {
+        "middleware_generated": {
+          "type": "boolean",
+          "description": "Whether payment middleware has been generated"
+        },
+        "last_generation": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "Timestamp of most recent middleware generation"
+        },
+        "endpoints": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "path": { "type": "string" },
+              "price": { "type": "number" },
+              "token": { "type": "string" },
+              "subsidy": { "type": "string" }
+            }
+          },
+          "description": "Payment-enabled endpoints"
+        },
+        "rate_limits": {
+          "type": "object",
+          "properties": {
+            "per_agent": { "type": "string" },
+            "per_ip": { "type": "string" },
+            "daily_subsidy": { "type": "integer" }
+          },
+          "description": "Configured rate limits"
+        }
+      }
+    }
+  }
+}
