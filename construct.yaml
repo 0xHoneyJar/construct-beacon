@@ -62,6 +62,16 @@ events:
 composition_paths:
   writes:
     - "grimoires/beacon/"
+capabilities:
+  model_tier: sonnet
+  danger_level: moderate
+  effort_hint: medium
+  downgrade_allowed: true
+  execution_hint: parallel
+  requires:
+    tool_calling: true
+    thinking_traces: false
+    vision: false
 identity:
   persona: identity/persona.yaml
   expertise: identity/expertise.yaml
