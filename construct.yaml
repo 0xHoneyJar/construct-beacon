@@ -1,9 +1,9 @@
 schema_version: 3
-name: Sigil of the Beacon
+name: Beacon
 slug: beacon
 version: 2.0.0
-description: Makes your project discoverable to the agent network. AI-retrievable content, trust signals, and x402 payment endpoints — the infrastructure that lets other constructs find and verify you.
-short_description: "AI-retrievable trust signals"
+description: "Make your content AI-indexable and your APIs agent-discoverable. Content audit scoring, markdown export with semantic chunking, API specification generation, and payment endpoint discovery. Designed for the agent-commerce future."
+short_description: "AI content indexing + API discovery"
 domain:
   - operations
 author: 0xHoneyJar
