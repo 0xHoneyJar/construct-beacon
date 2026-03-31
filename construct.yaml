@@ -2,7 +2,7 @@ schema_version: 3
 name: Beacon
 slug: beacon
 version: 2.0.0
-description: "Make your content AI-indexable and your APIs agent-discoverable. Content audit scoring, markdown export with semantic chunking, API specification generation, and payment endpoint discovery. Designed for the agent-commerce future."
+description: "Make your content readable by AI agents and your APIs easy to discover. Score content for AI readability, export clean markdown, split content into structured sections, and generate API specifications."
 short_description: "AI content indexing + API discovery"
 domain:
   - operations
