@@ -1,0 +1,103 @@
+name: defining-mcp-tools
+slug: defining-mcp-tools
+version: 2.1.0
+description: Generate an MCP server (stdio + optional Streamable HTTP) from a construct's or service's action surface. Codegen path for the constructs-mcp-shape doctrine.
+
+# Trigger patterns - when this skill should activate
+triggers:
+  - "/beacon-mcp"
+  - "generate MCP server for this construct"
+  - "make my construct agent-fetchable"
+  - "ship MCP tools from my actions"
+  - "scaffold MCP server"
+  - "expose this service to AI agents via MCP"
+  - "add MCP to this construct"
+  - "generate stdio MCP entry-point"
+
+# Natural language examples for intent matching
+examples:
+  - context: "User wants their construct callable from Claude Code"
+    user_says: "I want my codex construct to be queryable as MCP tools from Claude"
+    agent_action: "Launch defining-mcp-tools to generate stdio MCP server with lookup_X / list_X / validate_X tools from construct's action surface"
+  - context: "User upgrading existing service to MCP"
+    user_says: "Generate an MCP mirror of my x402 endpoints"
+    agent_action: "Launch defining-mcp-tools with --from-actions to consume defining-actions OpenAPI output and generate parallel MCP tools"
+  - context: "User adding remote deployment"
+    user_says: "Add a Dockerfile and HTTP transport so my construct's MCP can run on Railway"
+    agent_action: "Launch defining-mcp-tools with --paths stdio,remote to generate Streamable HTTP transport + Dockerfile + railway.toml"
+  - context: "User scaffolding from scratch"
+    user_says: "What MCP tools should this construct expose? Generate the four-op core."
+    agent_action: "Launch defining-mcp-tools and prompt for noun list, generate lookup_<noun> / list_<noun> / validate_<noun> / describe_<noun> stubs"
+
+# Domain hints for proactive suggestion
+domain_hints:
+  - mcp
+  - model-context-protocol
+  - agent-tools
+  - constructs
+  - stdio-server
+  - streamable-http
+  - tool-codegen
+  - beacon
+  - x402
+
+entry: SKILL.md
+
+capabilities:
+  model_tier: sonnet
+  danger_level: moderate
+  effort_hint: medium
+  downgrade_allowed: false
+  execution_hint: sequential
+  requires:
+    native_runtime: true
+    tool_calling: true
+    thinking_traces: false
+    vision: false
+
+allowed-tools:
+  - Read
+  - Write
+  - Glob
+  - Grep
+  - Edit
+  - Bash
+  - AskUserQuestion
+
+categories:
+  - operations
+
+inputExamples:
+  - "/beacon-mcp"
+  - "/beacon-mcp --paths stdio"
+  - "/beacon-mcp --paths stdio,remote"
+  - "/beacon-mcp --shape compute --from-actions"
+  - "/beacon-mcp --prefix codex"
+
+outputs:
+  - name: mcp-server
+    path: "bin/mcp.ts | src/mcp/server.ts"
+    format: detailed
+  - name: mcp-transport
+    path: "src/mcp/transport.ts"
+    format: detailed
+  - name: mcp-discovery
+    path: "app/.well-known/mcp/route.ts | dist/.well-known/mcp.json"
+    format: detailed
+  - name: dockerfile
+    path: "Dockerfile"
+    format: summary
+  - name: deploy-manifest
+    path: "railway.toml | fly.toml"
+    format: summary
+  - name: beacon-mcp-block
+    path: "beacon.yaml"
+    format: summary
+  - name: state
+    path: "grimoires/beacon/state.yaml"
+    format: summary
+
+environment:
+  optional:
+    - MCP_REMOTE_ENDPOINT
+    - MCP_DEPLOY_TARGET     # "railway" | "fly" | "render"

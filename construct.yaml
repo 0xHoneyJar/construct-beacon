@@ -1,9 +1,9 @@
 schema_version: 3
 name: Beacon
 slug: beacon
-version: 2.0.0
-description: "Make your content readable by AI agents and your APIs easy to discover. Score content for AI readability, export clean markdown, split content into structured sections, and generate API specifications."
-short_description: "AI content indexing + API discovery"
+version: 2.1.0
+description: "Make your content readable by AI agents and your APIs easy to discover. Score content for AI readability, export clean markdown, split content into structured sections, generate API specifications, and ship MCP servers from any construct or service."
+short_description: "AI content indexing + API discovery + MCP codegen"
 domain:
   - operations
 author: 0xHoneyJar
@@ -20,6 +20,8 @@ skills:
     path: skills/discovering-endpoints
   - slug: defining-actions
     path: skills/defining-actions
+  - slug: defining-mcp-tools
+    path: skills/defining-mcp-tools
   - slug: accepting-payments
     path: skills/accepting-payments
 repository:
@@ -58,6 +60,13 @@ events:
       data_schema:
         endpoint_path: string
         pricing: object
+    - type: forge.beacon.mcp_generated
+      description: Emitted when an MCP server is scaffolded from a construct's or service's action surface
+      data_schema:
+        shape: string
+        paths: array
+        tools_count: number
+        source_actions: number
   consumes: []
 composition_paths:
   writes:

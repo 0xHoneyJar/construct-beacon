@@ -58,9 +58,14 @@ graph LR
 
 ---
 
-## Target Framework
+## Target Frameworks
 
-Next.js (App Router). Four of six skills generate code that assumes `app/` directory routing, `route.ts` handlers, and React Server Components. Non-Next.js projects can still use `auditing-content` and `optimizing-chunks` (content analysis only).
+| Target | Skills that apply |
+|---|---|
+| **Next.js (App Router)** | All seven skills. Four generate code assuming `app/` directory routing + `route.ts` handlers + React Server Components. |
+| **Node service (any)** | `defining-mcp-tools` generates `src/mcp/server.ts` factory + Streamable HTTP transport for any Node entry-point. |
+| **Construct repo (Loa pack)** | `defining-mcp-tools` generates `bin/mcp.ts` stdio entry-point reading from construct data files. |
+| **Plain content site** | `auditing-content` and `optimizing-chunks` (content analysis only). |
 
 ---
 
@@ -110,7 +115,8 @@ Beacon refuses work outside its signal domain. These are not limitations — the
 | `generating-markdown` | Generates machine-friendly markdown from existing content |
 | `optimizing-chunks` | Optimizes content chunking for AI retrieval (RAG-friendly segmentation) |
 | `discovering-endpoints` | Generates `/.well-known/x402` discovery endpoints for agent-discoverable services |
-| `defining-actions` | Creates schema.org Action definitions for API endpoint discovery |
+| `defining-actions` | Creates schema.org Action definitions and JSON Schema/OpenAPI for API endpoints |
+| `defining-mcp-tools` | Generates an MCP server (stdio + Streamable HTTP) from a construct's or service's action surface |
 | `accepting-payments` | Generates x402 payment middleware for paid API endpoints |
 
 ---
