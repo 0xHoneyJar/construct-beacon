@@ -1,3 +1,10 @@
+---
+name: defining-mcp-tools
+description: Generate an MCP server from a construct's or service's action surface — agent-fetchable mirror of `defining-actions`. Produces stdio (Path A) and optional HTTP/Dockerfile (Path B) per the constructs-mcp-shape doctrine. Slash command `/beacon-mcp`.
+user-invocable: true
+allowed-tools: [Read, Write, Edit, Glob, Grep]
+---
+
 # Skill: defining-mcp-tools
 
 > Generate an MCP server from a construct's or service's action surface — the agent-fetchable mirror of `defining-actions`.

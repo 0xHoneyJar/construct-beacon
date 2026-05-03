@@ -1,3 +1,10 @@
+---
+name: defining-actions
+description: Generate JSON Schema and OpenAPI specifications for x402 endpoints — produces per-endpoint request/response schemas plus a combined OpenAPI fragment so AI agents can discover and call the surface. Slash command `/beacon-actions`.
+user-invocable: true
+allowed-tools: [Read, Write, Edit, Glob, Grep]
+---
+
 # Skill: defining-actions
 
 > Generate JSON Schema and OpenAPI specifications for x402 endpoints.

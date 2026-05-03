@@ -1,3 +1,10 @@
+---
+name: accepting-payments
+description: Generate x402 v2 payment middleware and route handlers for agent commerce. Turns any Next.js API route into a paid endpoint via slash command `/beacon-pay`.
+user-invocable: true
+allowed-tools: [Read, Write, Edit, Glob, Grep]
+---
+
 # Skill: accepting-payments
 
 > Generate x402 v2 payment middleware and route handlers for {context:chain_config.chain_name} agent commerce.
