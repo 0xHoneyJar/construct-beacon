@@ -36,6 +36,27 @@ The skill follows the **constructs-mcp-shape** doctrine (lookup × list × valid
 
 ## Workflow
 
+### Phase 0: Eligibility check (codified · ecosystem-health cycle 001 phase 9)
+
+**Beacon.yaml is shape-specific, not ecosystem-wide.** Before generating, verify the construct has an action surface. Skill-pack constructs (procedural workflows + slash commands without queryable data or HTTP routes) are EXEMPT.
+
+| Construct shape | Has beacon.yaml? | Why |
+|---|---|---|
+| `shape: data` (ships data corpora — `core-lore/*.md`, `data/*.json`, structured lore tables) | ✅ yes | lookup/list/validate tools wrap the corpus |
+| `shape: gateway` (ships MCP server or HTTP service) | ✅ yes | the wire surface IS the action surface |
+| `shape: skill-pack` (procedural workflows + slash commands · NO data corpus · NO HTTP routes) | ❌ EXEMPT | no queryable surface to wrap |
+
+Eligibility check sequence (run first, before Phase 1):
+
+1. Does `construct.yaml` declare `type: skill-pack` AND there's no `mcp/` dir AND no `package.json` with HTTP framework deps?
+   - **Yes** → output `EXEMPT — skill-pack without action surface; beacon.yaml does not apply` and halt. The construct is complete as-is.
+   - **No** → proceed.
+2. Does the construct ship data files referenced from skills (e.g., `core-lore/*.md`, `data/*.json`, structured lore tables)?
+   - **Yes** → shape: `data`; proceed to Phase 1.
+   - **No** (and no HTTP routes either) → output `EXEMPT — no data corpus or HTTP surface; beacon.yaml does not apply` and halt.
+
+**Codified during ecosystem-health cycle 001 phase 9.** Empirical learning: 4 of 4 target repos in cycle 001 Lane A (the-loom, the-mint, freeside, gygax) were skill-packs without action surface; all correctly exempted. The DIG framing of "1/38 has beacon.yaml" was wrong — the right framing is "1/N where N = the data/gateway-shaped subset of constructs". See `~/vault/wiki/concepts/constructs-ecosystem-health-cycle.md` §1 area 2 + §9 empirical outcomes.
+
 ### Phase 1: Detect Target Shape
 
 1. **Construct repo detection**
