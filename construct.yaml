@@ -27,6 +27,9 @@ skills:
 repository:
   url: https://github.com/0xHoneyJar/construct-beacon.git
   homepage: https://constructs.network/constructs/beacon
+streams:
+  reads: [Artifact]
+  writes: [Artifact]
 events:
   emits:
     - type: forge.beacon.audit_completed

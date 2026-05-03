@@ -40,3 +40,10 @@ See `identity/expertise.yaml` for full domain boundaries.
 - Does not manage advertising campaigns or social media
 - Does not design database schemas or backend data models
 - Does not handle frontend UI development
+
+## Trust Boundary
+
+Beacon reads from data corpora (existing content · API surfaces · construct manifests) and writes machine-readable artifacts (beacon.yaml · MCP server scaffolds · OpenAPI specs · structured-data exports).
+
+- reads: existing content (markdown · pages) · API endpoint definitions · construct action surfaces (Artifact corpora)
+- writes: `grimoires/beacon/` (audit reports · chunk optimizations) · generated `beacon.yaml` + MCP server source + OpenAPI specs at consumer paths
