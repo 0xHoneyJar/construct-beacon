@@ -1,3 +1,10 @@
+---
+name: auditing-content
+description: Analyze pages for LLM trust signals and retrieval resilience — audits content against a 5-layer trust model to prevent misquoting and FUD propagation. Slash command `/audit-llm`.
+user-invocable: true
+allowed-tools: [Read, Write, Glob, Grep]
+---
+
 # Skill: auditing-content
 
 > Analyze pages for LLM trust signals and retrieval resilience.

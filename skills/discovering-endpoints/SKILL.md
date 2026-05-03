@@ -1,3 +1,10 @@
+---
+name: discovering-endpoints
+description: Generate `/.well-known/x402` discovery endpoint for agent commerce — advertises services, pricing, and payment requirements. Slash command `/beacon-discover`.
+user-invocable: true
+allowed-tools: [Read, Write, Edit, Glob, Grep]
+---
+
 # Skill: discovering-endpoints
 
 > Generate x402 v2 discovery endpoint for agent commerce.

@@ -1,3 +1,10 @@
+---
+name: generating-markdown
+description: Add markdown export capability to Next.js pages via content negotiation (`Accept: text/markdown`) and copy buttons. Slash command `/add-markdown`.
+user-invocable: true
+allowed-tools: [Read, Write, Edit, Glob, Grep]
+---
+
 # Skill: generating-markdown
 
 > Add markdown export capability to Next.js pages via content negotiation and copy buttons.

@@ -1,3 +1,10 @@
+---
+name: optimizing-chunks
+description: Analyze content for AI chunk survival and generate context-carrying rewrites — identifies chunk-vulnerable content (paragraphs that mislead when retrieved out of context) and provides isolation-resilient rewrite patterns. Slash command `/optimize-chunks`.
+user-invocable: true
+allowed-tools: [Read, Write, Edit, Glob, Grep]
+---
+
 # Skill: optimizing-chunks
 
 > Analyze content for AI chunk survival and generate context-carrying rewrites.
