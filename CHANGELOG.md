@@ -5,6 +5,23 @@ All notable changes to the Beacon construct will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Doctrine
+
+**Naming disambiguation · `construct-beacon` vs `@0xhoneyjar/beacon-schema` (2026-05-03 · v0.3 federation cycle)**
+
+Two related-but-distinct names emerged during the v0.3 MCP federation broadcast cycle. They are NOT the same thing.
+
+- **`construct-beacon`** is the **authoring construct** — it provides the skills you use to AUTHOR a `beacon.yaml` for your MCP construct (`defining-mcp-tools`, `generating-markdown`, `auditing-content`, `accepting-payments`, `defining-actions`). Lives in the constructs-network registry. Audience: construct authors who want beacon authoring tooling in their workspace.
+- **`@0xhoneyjar/beacon-schema`** is the **runtime schema package** — the npm package that the freeside-mcp-gateway uses to VALIDATE beacons at boot time and that each construct's build step uses to VALIDATE beacons at deploy time. Lives in `freeside-mcp-gateway/packages/beacon-schema/` (workspace package). Audience: gateway implementation, construct build steps, future external integrators.
+
+The relationship: `construct-beacon` HELPS YOU AUTHOR a `beacon.yaml`; `@0xhoneyjar/beacon-schema` VALIDATES that the beacon.yaml conforms to the federation contract.
+
+No code changes in this construct for the cycle — informational only. Future cycle: the `defining-mcp-tools` skill MAY emit a default `beacon.yaml` stub validated against `@0xhoneyjar/beacon-schema` (closes the loop).
+
+Reference: `grimoires/bonfire/specs/freeside-mcp-federation-v0.3-broadcast-sdd-2026-05-03.md` §1.4.
+
 ## [2.1.0] - 2026-04-30
 
 ### Added

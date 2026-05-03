@@ -6,6 +6,8 @@
 
 Beacon makes your service visible to machines. While the rest of the web optimizes for human eyes and Google's crawler, Beacon optimizes for the agent network — LLMs that need to discover API endpoints, parse content into retrievable chunks, and negotiate x402 micropayments without human intervention. It marks your service as open for machine business.
 
+> **Naming note · `construct-beacon` ≠ `@0xhoneyjar/beacon-schema`.** This construct (`construct-beacon`) is the **authoring tooling** — skills you invoke to write a `beacon.yaml` for your MCP construct. The companion npm package [`@0xhoneyjar/beacon-schema`](https://github.com/0xHoneyJar/freeside-mcp-gateway/tree/main/packages/beacon-schema) is the **runtime contract** — the sealed Effect Schema the freeside-mcp-gateway uses to validate beacons at boot and that build steps use to validate beacons at deploy. `construct-beacon` HELPS YOU AUTHOR a beacon.yaml; `@0xhoneyjar/beacon-schema` VALIDATES it. See the v0.3 federation cycle changelog entry for context.
+
 ---
 
 ```mermaid
