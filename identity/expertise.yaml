@@ -1,8 +1,9 @@
 # Expertise: Beacon
-# Domain knowledge for SEO, structured data, and content discoverability.
+# Two-audience domain knowledge: structured data + SEO for search crawlers,
+# plus x402/MCP agent-surface for the agent network.
 
 target_framework: "Next.js (App Router)"
-framework_note: "4/6 skills generate code assuming app/ directory routing. auditing-content and optimizing-chunks are framework-agnostic."
+framework_note: "5/7 skills generate code assuming app/ directory routing. auditing-content and optimizing-chunks are framework-agnostic."
 
 domains:
   - name: "Structured Data"
@@ -30,20 +31,31 @@ domains:
   - name: "Content Discovery"
     depth: 4
     specializations:
-      - "Sitemap and robots.txt strategy"
-      - "Internal linking architecture"
+      - "LLM-trust / citation auditing for AI answer engines"
+      - "Chunk-survival and machine-parse resilience (chunk isolation)"
       - "Content chunking for AI consumption"
-      - "Markdown generation for documentation"
+      - "Markdown generation and negotiation for documentation"
+      - "Sitemap, robots.txt, and internal linking architecture"
     boundaries:
       - "Does not write original content"
       - "Does not handle social media distribution"
 
-  - name: "Payment Integration"
-    depth: 3
+  - name: "Agent Commerce (x402)"
+    depth: 4
     specializations:
-      - "Payment schema markup"
-      - "E-commerce structured data"
-      - "Pricing page optimization"
+      - "x402 /.well-known discovery (discovering-endpoints)"
+      - "x402 action / schema definition (defining-actions)"
+      - "x402 payment middleware (accepting-payments)"
     boundaries:
-      - "Does not implement payment processing"
+      - "Does not custody funds or settle on-chain"
       - "Does not handle financial compliance"
+
+  - name: "MCP Codegen"
+    depth: 4
+    specializations:
+      - "MCP server scaffolding from a construct's or service's action surface (defining-mcp-tools)"
+      - "stdio + Streamable HTTP delivery paths"
+      - "construct.yaml shape detection (data / compute)"
+    boundaries:
+      - "Does not author the source construct's manifest — consumes it"
+      - "Does not host the generated server"
