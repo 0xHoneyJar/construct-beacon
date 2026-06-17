@@ -3,7 +3,7 @@
 # plus x402/MCP agent-surface for the agent network.
 
 target_framework: "Next.js (App Router)"
-framework_note: "4/6 skills generate code assuming app/ directory routing. auditing-content and optimizing-chunks are framework-agnostic."
+framework_note: "5/7 skills generate code assuming app/ directory routing. auditing-content and optimizing-chunks are framework-agnostic."
 
 domains:
   - name: "Structured Data"
